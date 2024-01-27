@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form onsubmit="handleFormSubmit(event)">
+        <label for="category">Item name:</label>
+        <select id="category" required >
+            <option value=""disabled selected>Select a category</option >
+            <option value="Eclairs">Eclairs</option>   
+            <option value="cooldrink">cooldrink</option>
+            <option value="Milkybar">Milkybar</option>
+            <option value="Lays">Lays</option>
+            <option value="Lollypops">Lollypop</option>
+        </select>
+        <label for="description">Description:</label>
+        <input type="text" name="description" id="description" required />
+        <label for="expense">Price:</label>
+        <input type="number" name="expense" id="expense" required  />
+        <label for="quantity">quantity:</label>
+        <input type="number" name="quantity" id="quantity" required  />
+        <button type="submit">Add Item</button>
+      </form>
+      <ul id = "userList"></ul>
+    
+</body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="index.js"></script>
+</html>
