@@ -8,14 +8,7 @@
 <body>
     <form onsubmit="handleFormSubmit(event)">
         <label for="category">Item name:</label>
-        <select id="category" required >
-            <option value=""disabled selected>Select a category</option >
-            <option value="Eclairs">Eclairs</option>   
-            <option value="cooldrink">cooldrink</option>
-            <option value="Milkybar">Milkybar</option>
-            <option value="Lays">Lays</option>
-            <option value="Lollypops">Lollypop</option>
-        </select>
+        <input type="text" name="category" id="category" required />
         <label for="description">Description:</label>
         <input type="text" name="description" id="description" required />
         <label for="expense">Price:</label>
