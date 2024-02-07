@@ -1,11 +1,15 @@
+// Function to handle form submission
 async function handleFormSubmit(event) {
+    // Prevent default form submission behavior
     event.preventDefault();
 
+    // Extract data from the form
     const category = event.target.category.value;
     const description = event.target.description.value;
     const price = event.target.expense.value;
     const quantity = event.target.quantity.value;
 
+    // Construct expense data object
     const expenseData = {
         category,
         description,
@@ -14,17 +18,62 @@ async function handleFormSubmit(event) {
     };
 
     try {
-        const response = await axios.post('https://crudcrud.com/api/5300c65fd46d4b839f9569ab8b9190fd/sellersdashboard', expenseData);
-        showscreen(response.data);
+        // Make POST request to create a new expense
+        const response =  await axios.post('https://crudcrud.com/api/6df96a71d8524b17878a10a6f13b8fd1/sellersdashboard', expenseData);
+        
+        // Show the created expense on screen
+        showScreen(response.data);
     } catch (err) {
-        document.body.innerHTML = document.body.innerHTML + "<h4> Something went wrong</h4>";
+        // Handle errors
+        document.body.innerHTML += "<h4> Something went wrong</h4>";
         console.log(err);
     }
 }
 
-// Function to make the API call for buying an item
+// Function to display an item on the screen
+function showScreen(expenseData) {
+    const parentElement = document.getElementById("userList");
+    const listItem = document.createElement('li');
+    listItem.setAttribute('data-id', expenseData._id);
+    
+    const quantityNode = document.createElement('span');
+    quantityNode.classList.add('quantity');
+    quantityNode.textContent = `quantity: ${expenseData.quantity}`;
+    
+    listItem.textContent = `${expenseData.category} - ${expenseData.description} - Price: ${expenseData.price} - `;
+    listItem.appendChild(quantityNode);
+
+    // Create buy buttons with different decrements
+    const buy1Button = createBuyButton(expenseData, 1);
+    const buy2Button = createBuyButton(expenseData, 2);
+    const buy3Button = createBuyButton(expenseData, 3);
+
+    // Append buy buttons to the list item
+    listItem.appendChild(buy1Button);
+    listItem.appendChild(buy2Button);
+    listItem.appendChild(buy3Button);
+
+    // Append the list item to the parent element
+    parentElement.appendChild(listItem);
+}
+
+// Function to create a buy button with a specific quantity decrement
+function createBuyButton(expenseData, decrement) {
+    const buyButton = document.createElement('input');
+    buyButton.type = "button";
+    buyButton.value = `Buy ${decrement}`;
+    buyButton.onclick =  () => {
+        console.log(expenseData.quantity)
+        handleBuyAction(expenseData, decrement);
+    };
+    
+
+    return buyButton;
+}
+// Function to handle buying an item
 async function handleBuyAction(expenseData, decrement) {
     try {
+        // Update quantity in expense data
         const updatedData = {
             category: expenseData.category,
             description: expenseData.description,
@@ -32,73 +81,31 @@ async function handleBuyAction(expenseData, decrement) {
             quantity: expenseData.quantity - decrement,
         };
 
-        // Use Promise.all to perform both PUT and GET requests concurrently
-        const [putResponse, getResponse] = await Promise.all([
-            axios.put(`https://crudcrud.com/api/5300c65fd46d4b839f9569ab8b9190fd/sellersdashboard/${expenseData._id}`, updatedData),
-            axios.get(`https://crudcrud.com/api/5300c65fd46d4b839f9569ab8b9190fd/sellersdashboard/${expenseData._id}`)
-        ]);
+        // Make PUT request to update the expense
+       await axios.put(`https://crudcrud.com/api/6df96a71d8524b17878a10a6f13b8fd1/sellersdashboard/${expenseData._id}`, updatedData);
 
-        // Update the expenseData with the new quantity from the updated GET response
-        expenseData.quantity = getResponse.data.quantity;
+        // Update expenseData with new quantity
+        expenseData.quantity -= decrement;
 
-        // Update the displayed quantity on the screen
-        const quantityTextNode = document.querySelector(`#userList li[data-id="${expenseData._id}"] .quantity`);
-        if (quantityTextNode) {
-            const newQuantity = expenseData.quantity;
-            const decrementValue = decrement;
+        // Update displayed quantity on screen
+        const quantityNode = document.querySelector(`#userList li[data-id="${expenseData._id}"] .quantity`);
+         quantityNode.textContent = `quantity: ${expenseData.quantity}`;
+        
 
-            // Check if newQuantity is defined before updating the text content
-            const quantityText = typeof newQuantity !== 'undefined' ? `Quantity: ${newQuantity} ` : `Quantity: undefined `;
-
-            quantityTextNode.textContent = quantityText;
-        }
-
-        console.log(putResponse.data);
     } catch (err) {
         console.log(err);
     }
 }
-// Function to create a buy button with a specific quantity decrement
-function createBuyButton(expenseData, decrement) {
-    const buyButton = document.createElement('input');
-    buyButton.type = "button";
-    buyButton.value = `buy${decrement}`;
-    buyButton.onclick = async () => {
-        await handleBuyAction(expenseData, decrement);
-    };
 
-    return buyButton;
-}
-
-// Function to display an item on the screen
-function showscreen(expenseData) {
-    const parentele = document.getElementById("userList");
-    const childele = document.createElement('li');
-    childele.setAttribute('data-id', expenseData._id);
-    const quantityTextNode = document.createElement('span');
-    quantityTextNode.classList.add('quantity');
-    quantityTextNode.textContent = `Quantity: ${expenseData.quantity}`;
-    childele.textContent = `${expenseData.category} - ${expenseData.description} - Price: ${expenseData.price} - `;
-    childele.appendChild(quantityTextNode);
-
-    const buy1button = createBuyButton(expenseData, 1);
-    const buy2button = createBuyButton(expenseData, 2);
-    const buy3button = createBuyButton(expenseData, 3);
-    const deleteButton = document.createElement('button');
-
-    childele.appendChild(buy1button);
-    childele.appendChild(buy2button);
-    childele.appendChild(buy3button);
-
-    parentele.appendChild(childele);
-}
-
-// Window event listener
+// Window event listener to load expenses on page load
 window.addEventListener("DOMContentLoaded", async () => {
     try {
-        const response = await axios.get('https://crudcrud.com/api/5300c65fd46d4b839f9569ab8b9190fd/sellersdashboard');
+        // Fetch expenses from API
+        const response = await axios.get('https://crudcrud.com/api/6df96a71d8524b17878a10a6f13b8fd1/sellersdashboard');
+        
+        // Display each expense on screen
         for (let i = 0; i < response.data.length; i++) {
-            showscreen(response.data[i]);
+            showScreen(response.data[i]);
         }
     } catch (err) {
         console.log(err);
